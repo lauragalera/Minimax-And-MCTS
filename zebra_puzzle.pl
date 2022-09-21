@@ -1,7 +1,11 @@
+/* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
+
+
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- 
 Constraint store
 
 Author: Tony Lindgren
+Coauthor: Laura Galera (laga6199), America Castrejon
 
 */
 :- use_module([library(clpfd)]).
@@ -9,15 +13,15 @@ Author: Tony Lindgren
 zebra:-
         % Define variabels and their domain      
         House_colors = [Red, Green, White, Yellow, Blue],
-        House_colors ins 1..5, % Domain integers, 1 to 5  
+        domain(House_colors, 1,5), % Domain integers, 1 to 5  
         Nationality = [English, Swede, Dane, Norwegian, German],
-        Nationality ins 1..5,
+        domain(Nationality,1,5),
         Pet = [Dog, Birds, Cats, Horse, Zebra],
-        Pet ins 1..5,
+        domain(Pet,1,5),
         Smokes = [Pall_mall, Dunhill, Blend, Blue_master, Prince],
-        Smokes ins 1..5,
+        domain(Smokes,1,5),
         Drinks = [Tea, Coffee, Milk, Beer, Water],
-        Drinks ins 1..5,	
+        domain(Drinks,1,5),     
         % Define constraints and relations
         % All different constraints
         all_different(House_colors), 
