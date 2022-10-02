@@ -20,9 +20,10 @@ class GameSearch:
     '''
     Class containing different game search algorithms, call it with a defined game/node
     '''                 
-    def __init__(self, game, depth=3):
-        self.state = game       
+    def __init__(self, game, depth=3, time=10):  
+        self.state = game
         self.depth = depth
+        self.time = time
 
     def mcts(self):                     
         start_time = process_time() 
@@ -41,35 +42,49 @@ class GameSearch:
     
     def minimax_search(self): 
         start_time = process_time()   
-        _, move = self.max_value(self.state, self.depth)  
+        _, move = self.max_value(self.state, self.depth, -1*math.inf, math.inf, start_time)  
         return move
     
-    def max_value(self, state, depth):
+    def max_value(self, state, depth, alfa, beta, start_time):
         move = None
         terminal, value = state.is_terminal()
-        if terminal or depth == 0:
+        stop_time = process_time()
+        elapsed_time = stop_time - start_time
+        if terminal:
             return value, None
-        v = -100000
+        elif (depth == 0 or elapsed_time >= self.time):
+            return state.eval(), None
         actions = state.actions()
         for action in actions: 
             new_state = state.result(action)
-            v2, _ = self.min_value(new_state, depth - 1)
-            if v2 > v:
-                v = v2
+            v2, _ = self.min_value(new_state, depth - 1, alfa, beta, start_time)
+            if v2 > alfa:
+                alfa = v2
                 move = action
-        return v, move
+            if(alfa >= beta):
+                break
+        if(len(actions) == 0):
+            print(move)
+        return alfa, move
     
-    def min_value(self, state, depth):
+    def min_value(self, state, depth, alfa, beta, start_time):
         move = None
         terminal, value = state.is_terminal()
-        if terminal or depth == 0:
-            return value, None  
-        v = 100000
+        stop_time = process_time()
+        elapsed_time = stop_time - start_time
+        if terminal:
+            return value, None
+        elif (depth == 0 or elapsed_time >= self.time):
+            return state.eval(), None
         actions = state.actions()
         for action in actions: 
             new_state = state.result(action)
-            v2, _ = self.max_value(new_state, depth - 1)
-            if v2 < v:
-                v = v2
+            v2, _ = self.max_value(new_state, depth - 1, alfa, beta, start_time)
+            if v2 < beta:
+                beta = v2
                 move = action
-        return v, move
+            if alfa >= beta:
+                break
+        if(len(actions) == 0):
+            print(move)
+        return beta, move
