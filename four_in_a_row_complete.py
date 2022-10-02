@@ -45,8 +45,50 @@ class FourInARow:
             raise Exception("Invalid input") 
         return dc
         
-    #eval
-    #TODO
+    def eval(self):
+        #columns
+        weights_cols = 0
+        for c in self.board: #iterate columns
+            emptytiles = 0
+            tiles = 0
+            for r in range(6,0,-1): #iterate rows from top to bottom
+                if(len(c) < r): #no disc
+                    emptytiles += 1
+                elif emptytiles > 0 and c[r-1] == self.ai_player: #possibility of adding a disc
+                    tiles += 1
+                if(len(c) >= r and c[r-1] != self.ai_player) or r == 1: #found a rival disc or reached end of column
+                    weights_cols += self.compute_weight(tiles, emptytiles)
+                    break 
+        #rows
+        weights_rows = 0
+        for r in range(6): #iterate rows
+            emptytiles = 0
+            tiles = 0
+            for c in self.board: #iterate columns
+                if(len(c) < r+1): #no disc
+                    emptytiles += 1
+                elif(c[r] == self.ai_player):
+                    tiles += 1
+                else: #rival disc found, divide chain
+                    if tiles > 0:
+                        weights_rows += self.compute_weight(tiles, emptytiles)
+                    tiles = 0
+                    emptytiles = 0
+            if tiles > 0:
+                weights_rows += self.compute_weight(tiles, emptytiles)
+        return weights_cols + weights_rows
+    
+    @staticmethod
+    def compute_weight(tiles, empty_tiles):
+        if tiles >= 3 and empty_tiles >= 1:
+            return 0.9
+        elif tiles == 2 and empty_tiles >= 2:
+            return 0.3
+        elif tiles == 1 and empty_tiles >= 3:
+            return 0.1
+        else:
+            return 0
+        
         
     def is_terminal(self):
         #check vertical
@@ -62,24 +104,24 @@ class FourInARow:
                 if count == 4:
                     if self.ai_player == curr_chip:        
                         #print('Found vertical win')
-                        return True, 100          #MAX ai wins positive utility
+                        return True, 100         #MAX ai wins positive utility
                     else:
                         #print('Found vertical loss')
                         return True, -100         #MIN player wins negative utility
                     
         #check horizontal 
-        #TODO   
         for r in range (0, 6):
             count = 0
             curr_chip = None
 
             for c in range(0, len(self.board)):
-                if len(self.board[c]) >r :
+                if len(self.board[c]) > r : #there's chip
                     if curr_chip == self.board[c][r]:
                         count = count + 1
                     else:
                         curr_chip = self.board[c][r]     
                         count = 1
+                        
                     if count == 4:
                         if self.ai_player == curr_chip:        
                             #print('Found horizontal win')
@@ -87,6 +129,8 @@ class FourInARow:
                         else:
                             #print('Found horizontal loss')
                             return True, -100         #MIN player wins negative utility
+                else: #no chip
+                    count = 0       
             
                     
         #check positive diagonal
@@ -101,7 +145,6 @@ class FourInARow:
                         return True, -100
         
         #check negative diagonal 
-        #TODO   
         for c in range(7-3): 
             for r in range(6-3, 6):    
                 if len(self.board[c]) > r and len(self.board[c+1]) > r - 1 and len(self.board[c+2]) > r - 2 and len(self.board[c+3]) > r - 3:
@@ -113,10 +156,9 @@ class FourInARow:
                         return True, -100
              
         #check draw
-        #TODO
         count_d = 0
         for r in range(5,-1,-1):
-            for c in range(6):
+            for c in range(7):
                 try:
                     if self.board[c][r]:
                         count_d = count_d + 1

@@ -8,7 +8,7 @@ from game_node_and_game_search_complete import GameSearch
 
     
 def ask_ai(state0):
-    gs = GameSearch(state0, depth=3)
+    gs = GameSearch(state0, depth=8, time=10)
     move = gs.minimax_search()
     gs = GameSearch(state0, depth=3, time=20)
     move = gs.mcts()
@@ -20,7 +20,7 @@ def ask_ai(state0):
     stop, value = state1.is_terminal() 
     if stop == True:
         if value > 0:
-            print('AI won')                       
+            print('AI won')                      
         else:
             print('Human won')
         return state1, True
