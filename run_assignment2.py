@@ -8,9 +8,9 @@ from game_node_and_game_search_complete import GameSearch
 
     
 def ask_ai(state0):
-    gs = GameSearch(state0, depth=8, time=10)
-    move = gs.minimax_search()
-    gs = GameSearch(state0, depth=3, time=20)
+    #gs = GameSearch(state0, depth=8, time=10)
+    #move = gs.minimax_search()
+    gs = GameSearch(state0, depth=3, time=5)
     move = gs.mcts()
     state1 = state0.result(move)
     print('--------')

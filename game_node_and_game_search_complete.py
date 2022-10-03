@@ -2,13 +2,11 @@
 Definitions for GameNode, GameSearch and MCTS
 
 Author: Tony Lindgren
+Coauthors: Laura Galera and 
 '''
-from lib2to3.pytree import Leaf
-from platform import node
 from time import process_time
 import random
 import math
-from turtle import left
 import numpy as np
 
 
@@ -17,12 +15,12 @@ class GameNode:
     This class defines game nodes in game search trees. It keep track of: 
     state
     '''
-    def __init__(self, state, node=None, parent=None):
+    def __init__(self, state, node=None, parent=None, move = 0):
         self.state = state
         self.parent = parent 
         self.wins = 0 
         self.succesors = [] 
-        self.move = 0 
+        self.move = move 
         self.actions_left = []  
         self.visits = 0 
            
@@ -35,14 +33,15 @@ class GameSearch:
         self.depth = depth
         self.time = time
 
-    def mcts(self):                     
+    def mcts(self):
+        '''
+        Monte Carlo tree search algorithm
+        '''                     
         start_time = process_time() 
         tree = GameNode(self.state)
         tree.actions_left = tree.state.actions()   
         elapsed_time = 0
-        iteracion = 0
         while elapsed_time < self.time:
-            iteracion+=1  
             leaf = self.select(tree)
             child = self.expand(leaf)          
             result = self.simulate(child) 
@@ -54,89 +53,94 @@ class GameSearch:
         
     def select(self, node):
         '''
-        selects a node to expand and the expand function 
-        that creates new children nodes
+        selects successive child nodes until a leaf node with a
+        potential child is reached
         '''
-        max_ucb = -np.Infinity
-        if len(node.actions_left):
+        if len(node.actions_left) or node.state.is_terminal()[0]:
             return node
         
-        node = self.compute_ucb(node, max_ucb) 
-   
-        if node.state.is_terminal()[0]:
-            return node
+        node = self.compute_ucb(node) 
 
-        if len(node.succesors)<1:
+        if not len(node.succesors): #node never expanded
             node.actions_left = node.state.actions()  
 
         return self.select(node)
 
     def expand(self, leaf):
         '''
-        we randomly pick an unexplored node of a leaf node.
+        randomly picks an unexplored node of a leaf node.
         '''
-        if leaf.state.is_terminal()[0] or not len(leaf.actions_left):
+        if leaf.state.is_terminal()[0]:
             return leaf
         move = random.choice(leaf.actions_left)
         leaf.actions_left.remove(move)
-        node = GameNode(leaf.state.result(move), parent = leaf)
+        node = GameNode(leaf.state.result(move), parent = leaf, move = move)
         leaf.succesors.append(node)
         return node
     
     def simulate(self, child):
         '''
-        we roll out multiple simulations 
+        completes a random playout until the game is decided 
         '''
-        if child.state.is_terminal()[0] or not len(child.actions_left):
+        if child.state.is_terminal()[0]:
             return child
         move = random.choice(child.state.actions())
-        node = GameNode(child.state.result(move), parent = child)
+        node = GameNode(child.state.result(move), parent = child, move = move)
         return self.simulate(node)       
 
     def back_propagate(self, result, child):
         '''
-        keep track of which player turn it is to
-        move
+        uses the result of the playout to update the information in
+        the nodes from the path child to the root.
         '''
-        terminal, value = result.state.is_terminal()
-        # if flag>1 is human
-        flag = 1
-        
-        while child.parent!=None:
+        _, value = result.state.is_terminal()
+            
+        while child!= None:
             child.visits +=1
-            if value>0:
+            #keep track of the player
+            chip = child.state.to_move()
+            ai_player = child.state.ai_player
+            if (value > 0 and chip == ai_player) or (value < 0 and chip != ai_player):
                 child.wins +=1
-
+            elif(value != 0):
+                child.wins -=1
             child = child.parent
-            flag*=-1
 
     def actions(self, tree):
-        node = None # terminal node must not be
+        '''
+        returns the best move from the simulated playouts
+        '''
+        node = self.compute_ucb(tree)
+        return node.move
+
+    def compute_ucb(self, node):
+        '''
+        returns the child of node with the highest ucb 
+        '''
         max_ucb = -np.Infinity
-        node = self.compute_ucb(tree, max_ucb)
-
-        for a in tree.state.actions():
-            if node.state.board == tree.state.result(a).board:
-                return a
-
-    def compute_ucb(self, node, max_ucb):
+        max_node = node
         for child in node.succesors:
-            if child.visits!=0 and node.wins !=0 :
-                ucb = child.wins/child.visits + 1.4 * np.sqrt((np.log(node.wins)/child.visits))
+            print(child.visits, child.wins, node.visits)
+            if child.visits > 0 and node.visits > 0: 
+                ucb = child.wins/child.visits + 1.4 * np.sqrt(np.log(node.visits)/child.visits)
                 if ucb > max_ucb :
+                    print(ucb)
                     max_ucb = ucb
-                    node = child
-            else:
-                node = child
+                    max_node = child
+            else: #node never visited
+                max_node = child
                 break
-        return node
+        return max_node
 
-    def minimax_search(self): 
+    def minimax_search(self):
+        '''
+        Minimax algorithm
+        ''' 
         start_time = process_time()   
         _, move = self.max_value(self.state, self.depth, -1*math.inf, math.inf, start_time)  
         return move
     
-    def max_value(self, state, depth, alfa, beta, start_time):
+    def max_value(self, state, depth, alfa, beta, start_time):        
         move = None
         terminal, value = state.is_terminal()
         stop_time = process_time()
