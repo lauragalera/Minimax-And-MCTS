@@ -100,10 +100,8 @@ class GameSearch:
             #keep track of the player
             chip = child.state.to_move()
             ai_player = child.state.ai_player
-            if (value > 0 and chip == ai_player) or (value < 0 and chip != ai_player):
+            if (value > 0):
                 child.wins +=1
-            elif(value != 0):
-                child.wins -=1
             child = child.parent
 
     def actions(self, tree):
@@ -120,11 +118,9 @@ class GameSearch:
         max_ucb = -np.Infinity
         max_node = node
         for child in node.succesors:
-            print(child.visits, child.wins, node.visits)
             if child.visits > 0 and node.visits > 0: 
                 ucb = child.wins/child.visits + 1.4 * np.sqrt(np.log(node.visits)/child.visits)
                 if ucb > max_ucb :
-                    print(ucb)
                     max_ucb = ucb
                     max_node = child
             else: #node never visited
