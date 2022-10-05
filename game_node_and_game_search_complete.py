@@ -93,16 +93,16 @@ class GameSearch:
         uses the result of the playout to update the information in
         the nodes from the path child to the root.
         '''
-        _, value = result.state.is_terminal()
+        _, value = result.state.is_terminal()    
+        flag = child.state.ai_player != child.state.curr_move
             
         while child!= None:
             child.visits +=1
             #keep track of the player
-            chip = child.state.to_move()
-            ai_player = child.state.ai_player
-            if (value > 0):
+            if value > 0 and flag:
                 child.wins +=1
             child = child.parent
+            flag = not flag
 
     def actions(self, tree):
         '''
