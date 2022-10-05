@@ -5,7 +5,7 @@
 Constraint store
 
 Author: Tony Lindgren
-Coauthor: Laura Galera (laga6199), America Castrejon
+Coauthor: Laura Galera (laga6199), America Castrejon (amca6849)
 
 */
 :- use_module([library(clpfd)]).
