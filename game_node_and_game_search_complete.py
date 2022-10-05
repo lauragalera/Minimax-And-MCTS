@@ -2,7 +2,7 @@
 Definitions for GameNode, GameSearch and MCTS
 
 Author: Tony Lindgren
-Coauthors: Laura Galera and 
+Coauthors: Laura Galera and America Castrejon 
 '''
 from time import process_time
 import random
@@ -108,8 +108,13 @@ class GameSearch:
         '''
         returns the best move from the simulated playouts
         '''
-        node = self.compute_ucb(tree)
-        return node.move
+        max_visited = -np.Infinity
+        move = None
+        for child in tree.succesors:
+            if child.visits > max_visited:
+                max_visited = child.visits
+                move = child.move
+        return move
 
     def compute_ucb(self, node):
         '''
@@ -136,7 +141,10 @@ class GameSearch:
         _, move = self.max_value(self.state, self.depth, -1*math.inf, math.inf, start_time)  
         return move
     
-    def max_value(self, state, depth, alfa, beta, start_time):        
+    def max_value(self, state, depth, alfa, beta, start_time):
+        '''
+        returns the move and the value that maximize the win of AI player
+        '''        
         move = None
         terminal, value = state.is_terminal()
         stop_time = process_time()
@@ -159,6 +167,9 @@ class GameSearch:
         return alfa, move
     
     def min_value(self, state, depth, alfa, beta, start_time):
+        '''
+        returns the move and the value that minimize the loss of AI player
+        '''
         move = None
         terminal, value = state.is_terminal()
         stop_time = process_time()

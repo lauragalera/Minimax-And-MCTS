@@ -2,10 +2,14 @@
 Four in a row
 
 Author: Tony Lindgren
+Coauthors: Laura Galera and America Castrejon
 '''
 from copy import deepcopy
 
 class FourInARow:
+    '''
+    This class defines a four in a row game
+    '''
     def __init__(self, player, chip):
         new_board = []
         for _ in range(7):
@@ -21,10 +25,16 @@ class FourInARow:
         self.curr_move = chip
     
     def to_move(self):
+        '''
+        returns the player turn
+        '''
         return self.curr_move
         
-    #actions
     def actions(self):
+        '''
+        returns a list of the possible moves that can
+        be done
+        '''
         actions = []
         for i in range(len(self.board)):
             if len(self.board[i]) < 6:
@@ -32,7 +42,10 @@ class FourInARow:
         return actions
 
 
-    def result(self, action):                    
+    def result(self, action): 
+        '''
+        returns the game after applying the requested move
+        '''                   
         dc = deepcopy(self)
         if len(dc.board[action])< 6:
             if self.to_move() == 'w':
@@ -46,6 +59,10 @@ class FourInARow:
         return dc
         
     def eval(self):
+        '''
+        returns a heuristic of the actual board depending how advantageous is for
+        the AI player
+        '''
         #columns
         weights_cols = 0
         for c in self.board: #iterate columns
@@ -80,6 +97,10 @@ class FourInARow:
     
     @staticmethod
     def compute_weight(tiles, empty_tiles):
+        '''
+        returns an heuristic depending on the chain of tiles with chips from
+        the same player and empty tiles
+        '''
         if tiles >= 3 and empty_tiles >= 1:
             return 0.9
         elif tiles == 2 and empty_tiles >= 2:
@@ -91,6 +112,10 @@ class FourInARow:
         
         
     def is_terminal(self):
+        '''
+        returns whether the game has ended, and a positive value if the AI won,
+        a negative one if the AI lost, and 0 if it ended in draw
+        '''
         #check vertical
         for c in range(0, len(self.board)):
             count = 0
@@ -171,8 +196,10 @@ class FourInARow:
                 
         return False, 0                                            
                 
-    #pretty_print
     def pretty_print(self):
+        '''
+        prints the board of the game
+        '''
         for r in range(5,-1,-1):
             for c in range(7):
                 try:

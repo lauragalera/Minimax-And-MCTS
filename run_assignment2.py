@@ -2,15 +2,19 @@
 Define game and start execution of game search
 
 Author: Tony Lindgren
+Coauthor: Laura Galera and America Castrejon
 '''
 from four_in_a_row_complete import FourInARow
 from game_node_and_game_search_complete import GameSearch
 
     
 def ask_ai(state0):
-    #gs = GameSearch(state0, depth=8, time=10)
+    '''
+    returns the state of the game after the AI made a move
+    and whether the game ended with the last move or not
+    '''
+    gs = GameSearch(state0, depth=3, time=10)
     #move = gs.minimax_search()
-    gs = GameSearch(state0, depth=3, time=5)
     move = gs.mcts()
     state1 = state0.result(move)
     print('--------')
@@ -27,6 +31,10 @@ def ask_ai(state0):
     return state1, False 
 
 def ask_player(state0):
+    '''
+    returns the state of the game after the human made a move
+    and whether the game ended with the last move or not
+    '''
     print('--------')
     print('Player moves')
     print('--------')
